@@ -21,6 +21,6 @@ operation = 1 + 2 - 1 * 2 / 2 // 2 + 1 % 2
 #String Formatting – f-strings Basics
 #example
 x = 5
-print(f(x = {x})) #in { } the value of a variable or something
+print(f(x = {x}) #in { } the value of a variable or something
 #practice 6
 #From Practice 5, derive a variable with the radius value using f-strings
