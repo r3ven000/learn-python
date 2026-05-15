@@ -38,5 +38,26 @@ print(viking_song)
 
 viking_song = "Spam " * spam_amount
 print(viking_song)
+#The * operator can be used to multiply two numbers (3 * 3 evaluates to 9), but we can also multiply a string by a number
+
+
+#Numbers and arithmetic in Python
+
+spam_amount = 0
+#we could ask Python how it would describe the type of thing that spam_amount is:
+type(spam_amount)
+#It's an int - short for integer. There's another sort of number we commonly encounter in Python:
+type(19.95)
+
+#A float is a number with a decimal place - very useful for representing things like weights or proportions.
+#"True division" is basically what your calculator does:
+print(5 / 2)
+print(6 / 2)
+
+#The // operator gives us a result that's rounded down to the next integer.
+print(5 // 2)
+print(6 // 2)
+
+
 
 
