@@ -18,10 +18,14 @@ print(r"""--.._"
 """)
 
 pizzas = {
-    "cheese4": 3,
-    "pepperoni": 4,
-    "pineapple": 5,
-    "fish": 4
+    "Margherita": 3,
+    "Pepperoni": 4,
+    "Hawaiian": 5,
+    "Meat Fest": 4,
+    "BBQ Chicken": 4,
+    "Vegetarian": 3,
+    "Mushroom": 3,
+    "Four Seasons": 4
       }
 print(pizzas)
 print('Hello!')
