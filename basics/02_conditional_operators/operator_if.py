@@ -6,6 +6,8 @@ if x + y == 7:
 #A tab is needed here because the actions take place inside the condition ( : )
   print("x and y = 7!")
 
+#!!! Please refer to chapter 1 in note 1  !!!
+
 if x * y == 10:
   print("x * y = 10!")
 
