@@ -3,7 +3,7 @@ while True:
     uniq_num = input('enter uniq num(or exit): ')
     if uniq_num == 'exit':
         break
-    elif uniq_num not in numbers:
+    if uniq_num not in numbers:
         numbers.append(uniq_num)
         print(f'num uniq and add! list: {numbers}')
     else:
