@@ -1,5 +1,6 @@
-print('Welcome to TO-DO lists in python!')
-
+import pyfiglet
+welcome = pyfiglet.figlet_format('Welcome to TO-DO lists in python!')
+print(welcome)
 todo_list = [0]
 
 def create_list(todo):
