@@ -24,26 +24,37 @@ def create_list(todo):
         elif command == 'del':
 
             if len(parts) > 1:
-
-                idx = int(parts[1])
-                todo.pop(idx)
+                try:
+                    idx = int(parts[1])
+                    if 0 <= idx < len(todo):
+                        todo.pop(idx)
+                    else:
+                        print('invalid index'.center(width))
+                except ValueError:
+                    print('please enter a valid number'.center(width))
 
         elif command == 'edit':
-            if len(parts) > 1:
-                idx = int(parts[1])
-                new_text_task = input('enter new text task: ')
-                todo[idx] = new_text_task
-            else:
-                todo.append(name_task)
-                print("\n" + " TASKS ".center(width, "="))
-                has_tasks = False
-                for index, task in enumerate(todo):
-                    if task != 0:
-                        task_str = f'{index}. {task}'
-                        print(task_str.center(width))
-                        has_tasks = True
-                if not has_tasks:
-                    print('there are no tasks yet'.center(width))
+            try:
+                if len(parts) > 1:
+                    idx = int(parts[1])
+                    new_text_task = input('enter new text task: ')
+                    todo[idx] = new_text_task
+                else:
+                    print('invalid index'.center(width))
+            except IndexError:
+                print('please enter a valid number')
+
+        else:
+            todo.append(multi_task)
+            print("\n" + " TASKS ".center(width, "="))
+            has_tasks = False
+            for index, task in enumerate(todo):
+                if task != 0:
+                    task_str = f'{index}. {task}'
+                    print(task_str.center(width))
+                    has_tasks = True
+            if not has_tasks:
+                print('there are no tasks yet'.center(width))
                 print('=' * width + '\n')
 
 
@@ -84,7 +95,5 @@ while True:
     else:
         print('command not found!'.center(width))
 print(welcome)
-
-
 
 
