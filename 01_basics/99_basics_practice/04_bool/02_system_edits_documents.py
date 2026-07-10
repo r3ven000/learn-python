@@ -3,7 +3,7 @@ def system_edits_documents(user, file, lock):
         return True
     else:
         return False
-
+# test 
 user_1 = 'guest'
 user_2 = 'is_admin'
 user_3 = 'is_author'
