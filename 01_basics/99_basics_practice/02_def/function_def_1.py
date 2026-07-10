@@ -10,3 +10,4 @@ def sum_even(numbers):
             
 #example
 print(sum_even([1, 2, 3, 4, 5, 6]))
+# def1
