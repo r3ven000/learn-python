@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import numpy
 #step 1
 
@@ -17,21 +16,15 @@ DATA = [
     ("пвт",    "пвт"),
 ]
 
-<<<<<<< HEAD
 def word_to_codes(word): #translate word to numbers(codes)
-=======
-def word_to_codes(word):
->>>>>>> e4a6425 (delete old practice)
+
     codes = []
     for i in word:
         codes.append(VOCAB[i])
     return codes
 
-<<<<<<< HEAD
-def codes_to_onehot(codes): #matrix
-=======
 def codes_to_onehot(codes):
->>>>>>> e4a6425 (delete old practice)
+
     result = []
     for code in codes:
         vector = [0] * 7
@@ -39,7 +32,6 @@ def codes_to_onehot(codes):
         result.append(vector)
     return result
 
-<<<<<<< HEAD
 #step 2
 
 N = 10
