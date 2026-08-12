@@ -1,1 +1,0 @@
-"""OpenType feature generation package."""
