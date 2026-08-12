@@ -1,0 +1,688 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Maple Mono Build Configuration Schema",
+  "description": "Schema for the build configuration of Maple Mono",
+  "type": "object",
+  "definitions": {
+    "freeze_options": {
+      "type": "string",
+      "enum": [
+        "ignore",
+        "disable",
+        "enable"
+      ],
+      "enumDescriptions": [
+        "Do nothing",
+        "Remove the features from font file",
+        "Enable the features as default ligatures"
+      ]
+    },
+    "stem_width_mode": {
+      "type": "string",
+      "enum": [
+        "strong",
+        "quantized",
+        "natural"
+      ],
+      "enumDescriptions": [
+        "If active, stem widths and blue zones are snapped and positioned to integer pixel values as much as possible. This gives high contrast, but glyph shape distortion can be significant.",
+        "Both stem widths and blue zone positions are slightly quantized to take discrete values. For example, stem values 50, 51, 72, 76, and 100 would become 50, 74, and 100 (or something similar). More glyph shape distortion but increased contrast.",
+        "No adjustments to stem widths, discrete blue zone positioning. This is what FreeType uses for its \u2018light\u2019 (auto-)hinting mode. Essentially no glyph shape distortion, low contrast."
+      ]
+    },
+    "cjk_common_config": {
+      "type": "object",
+      "properties": {
+        "with_nerd_font": {
+          "type": "boolean",
+          "description": "Whether to patch Nerd-Font for selected CJK entries",
+          "default": true
+        },
+        "fix_meta_table": {
+          "type": "boolean",
+          "description": "Fix design language and supported languages in META table for built-in CJK presets",
+          "default": true
+        },
+        "clean_cache": {
+          "type": "boolean",
+          "description": "Force CJK variable/source fallback regeneration when required; preserves files and does not bypass a valid static directory digest",
+          "default": false
+        },
+        "narrow": {
+          "type": "boolean",
+          "description": "Whether to narrow CJK glyphs",
+          "default": false
+        },
+        "use_hinted": {
+          "type": "boolean",
+          "description": "Whether to run AutoHint on final merged CJK static fonts after instantiation or merge",
+          "default": false
+        },
+        "scale_factor": {
+          "type": [
+            "number",
+            "array"
+          ],
+          "description": "Scale factor for CJK glyphs with <factor> or [<width_factor>,<height_factor>]",
+          "default": 1.0
+        }
+      }
+    },
+    "formats": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "ttf",
+          "otf",
+          "woff2"
+        ]
+      },
+      "default": [
+        "ttf",
+        "otf",
+        "woff2"
+      ]
+    }
+  },
+  "properties": {
+    "pool_size": {
+      "type": "number",
+      "description": "The number of parallel tasks. Default is 4. When run in codespace, this will be 1",
+      "default": 4
+    },
+    "family_name": {
+      "type": "string",
+      "description": "The font family name",
+      "default": "Maple Mono"
+    },
+    "font_version": {
+      "type": "string",
+      "description": "The three-digit version embedded in generated fonts",
+      "pattern": "^\\d+\\.\\d{3}$",
+      "default": "7.900"
+    },
+    "weight_mapping": {
+      "type": "object",
+      "properties": {
+        "thin": {
+          "type": "number",
+          "description": "Weight mapping of thin",
+          "default": 100
+        },
+        "extralight": {
+          "type": "number",
+          "description": "Weight mapping of extra light",
+          "default": 200
+        },
+        "light": {
+          "type": "number",
+          "description": "Weight mapping of light",
+          "default": 300
+        },
+        "regular": {
+          "type": "number",
+          "description": "Weight mapping of regular",
+          "default": 400
+        },
+        "semibold": {
+          "type": "number",
+          "description": "Weight mapping of semibold",
+          "default": 500
+        },
+        "medium": {
+          "type": "number",
+          "description": "Weight mapping of medium",
+          "default": 600
+        },
+        "bold": {
+          "type": "number",
+          "description": "Weight mapping of bold",
+          "default": 700
+        },
+        "extrabold": {
+          "type": "number",
+          "description": "Weight mapping of extra bold",
+          "default": 800
+        }
+      }
+    },
+    "codepoint_alias": {
+      "type": "object",
+      "description": "Additional codepoint aliases applied after font compilation. Built-in compatibility aliases are always enabled.",
+      "propertyNames": {
+        "pattern": "^0x[0-9A-Fa-f]{4,6}$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^0x[0-9A-Fa-f]{4,6}$"
+      },
+      "default": {}
+    },
+    "use_hinted": {
+      "type": "boolean",
+      "description": "Whether to use hinted Latin TTF and Nerd Font static outputs as the base for static NF/CJK merges",
+      "default": true
+    },
+    "standard_zero": {
+      "type": "boolean",
+      "description": "Use standard OpenType zero semantics: the default zero is dotted and the `zero` feature selects the slashed form",
+      "default": false
+    },
+    "ligature": {
+      "type": "boolean",
+      "description": "Whether to enable ligature.\nIf set to false, all the ligatures will be removed and 'ssXX' options in 'feature_freeze' will no longer effect",
+      "default": true
+    },
+    "infinite_arrow": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Enable infinite arrow ligatures\n- null: disabled in hinted font, enabled in unhinted font\n- true: enabled\n- false: disabled",
+      "default": null
+    },
+    "remove_tag_liga": {
+      "type": "boolean",
+      "description": "Remove plain text tag ligatures like `[TODO]`",
+      "default": false
+    },
+    "line_height": {
+      "type": "number",
+      "description": "Scale factor for line height. (e.g. 1.1)",
+      "default": 1.0
+    },
+    "width": {
+      "type": "string",
+      "enum": [
+        "default",
+        "narrow",
+        "slim"
+      ],
+      "description": "Set glyph width: default (600), narrow (550), slim (500)",
+      "default": "default"
+    },
+    "ttfautohint_param": {
+      "type": "object",
+      "description": "Parameters for ttfautohint, see details in https://freetype.org/ttfautohint/doc/ttfautohint.html#options",
+      "properties": {
+        "hinting_limit": {
+          "type": "integer",
+          "description": "The PPEM value (in pixels) where hinting gets switched off",
+          "default": 200
+        },
+        "hinting_range_min": {
+          "type": "integer",
+          "description": "The minimum PPEM value (in pixels) at which hint sets are created",
+          "default": 8
+        },
+        "hinting_range_max": {
+          "type": "integer",
+          "description": "The maximum PPEM value (in pixels) at which hint sets are created",
+          "default": 50
+        },
+        "increase_x_height": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 14,
+          "description": "Maximum PPEM (6 to n) for x-height rounding up to improve legibility. Set to 0 to disable."
+        },
+        "stem_width_mode": {
+          "type": "object",
+          "description": "Algorithms for computing horizontal stem widths and the positioning of blue zones.",
+          "properties": {
+            "gray": {
+              "description": "Grayscale rendering, with or without optimization for subpixel positioning (e.g., Android).",
+              "$ref": "#/definitions/stem_width_mode"
+            },
+            "gdi_cleartype": {
+              "description": "\u2018GDI ClearType\u2019 rendering: the rasterizer version, as returned by the GETINFO bytecode instruction, is in the range 36 <= version <= 38 and ClearType is enabled (e.g., Windows XP).",
+              "$ref": "#/definitions/stem_width_mode"
+            },
+            "dw_cleartype": {
+              "description": "\u2018DirectWrite ClearType\u2019 rendering: the rasterizer version, as returned by the GETINFO bytecode instruction, is >= 39, ClearType is enabled, and subpixel positioning is enabled also (e.g., Internet Explorer 9 running on Windows 7).",
+              "$ref": "#/definitions/stem_width_mode"
+            }
+          }
+        }
+      }
+    },
+    "feature_freeze": {
+      "type": "object",
+      "description": "Freeze selected font features. For static fonts, `enable` bakes applicable substitutions into glyph data or moves configured contextual rules into `calt`, `disable` removes the feature lookup, and `ignore` leaves the feature available. For variable fonts, `enable` moves applicable rules from `cvXX` / `ssXX` / `zero` into `calt` during generation; `disable` and `ignore` do not bake static substitutions.",
+      "properties": {
+        "cv01": {
+          "description": "[v7.0] Normalize special symbols ('@ $ & % Q => ->')",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv02": {
+          "description": "[v7.0] Alternative 'a' with top arm, no effect in italic style",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv03": {
+          "description": "[v7.0] Alternative 'i' without left bottom bar",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv04": {
+          "description": "[v7.0] Alternative 'l' with left bottom bar, like consolas, will be overrided by 'cv35' in italic style",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv05": {
+          "description": "[v7.1] Alternative 'g' in double story style, no effect in italic style",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv06": {
+          "description": "[v7.1] Alternative 'i' without bottom bar, no effect in italic style",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv07": {
+          "description": "[v7.1] Alternative 'J' without top bar, no effect in italic style",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv08": {
+          "description": "[v7.1] Alternative 'r' with bottom bar, no effect in italic style",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv09": {
+          "description": "[v7.5] Alternative '7' with middle bar, no effect in italic style",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv10": {
+          "description": "[v7.5] Alternative 'Z' and 'z' with middle bar, no effect in italic style",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv11": {
+          "description": "[v7.7] Alternative 'f' with bottom bar, no effect in italic style",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv12": {
+          "description": "[v8.0] Alternative 'u' without tail, no effect in italic style",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv31": {
+          "description": "[v7.0] Alternative italic 'a' with top arm",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv32": {
+          "description": "[v7.0] Alternative Italic 'f' without bottom tail",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv33": {
+          "description": "[v7.0] Alternative Italic 'i' and 'j' with left bottom bar and horizen top bar",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv34": {
+          "description": "[v7.0] Alternative Italic 'k' without center circle",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv35": {
+          "description": "[v7.0] Alternative Italic 'l' without center tail",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv36": {
+          "description": "[v7.0] Alternative Italic 'x' without top and bottom tails",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv37": {
+          "description": "[v7.0] Alternative Italic 'y' with straight intersection",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv38": {
+          "description": "[v7.1] Alternative italic 'g' in double story style",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv39": {
+          "description": "[v7.1] Alternative Italic 'i' without bottom bar",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv40": {
+          "description": "[v7.1] Alternative italic 'J' without top bar",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv41": {
+          "description": "[v7.1] Alternative italic 'r' with bottom bar",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv42": {
+          "description": "[v7.5] Alternative italic '7' with middle bar",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv43": {
+          "description": "[v7.5] Alternative italic 'Z' and 'z' with middle bar",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv44": {
+          "description": "[v7.7] Alternative Italic 'f' with bottom bar",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv45": {
+          "description": "[v8.0] Alternative italic 'u' without tail",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv61": {
+          "description": "[v7.1] Alternative ',' and ';' with straight tail",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv62": {
+          "description": "[v7.1] Alternative '?' with larger openings",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv63": {
+          "description": "[v7.1] Alternative '<=' in arrow style",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv64": {
+          "description": "[v7.3] Alternative '<=' and '>=' with horizen bottom bar",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv65": {
+          "description": "[v7.3] Alternative '&' in handwriting style",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv66": {
+          "description": "[v7.8] Alternative pipe arrows",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv67": {
+          "description": "[v8.0] Alternative longer bar",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv68": {
+          "description": "[v8.0] Alternative '===' with 2 bars",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv96": {
+          "description": "[v7.0] Full width quotes ('\u201c' / '\u201d' / '\u2018' / '\u2019')",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv97": {
+          "description": "[v7.0] Full width ellipsis ('\u2026')",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv98": {
+          "description": "[v7.0] Full width emdash ('\u2014')",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "cv99": {
+          "description": "[v7.0] Traditional centered punctuations",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "ss01": {
+          "description": "[v7.0] Broken multiple equals ligatures ('==', '===', '!=', '!==' ...)",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "ss02": {
+          "description": "[v7.0] Broken compare and equal ligatures ('<=', '>=')",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "ss03": {
+          "description": "[v7.0] Allow to use any case in all tags",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "ss04": {
+          "description": "[v7.0] Broken multiple underscores ligatures ('__', '#__')",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "ss05": {
+          "description": "[v7.0] Revert thin backslash in escape symbols ('\\\\', '\\\"', '\\.' ...)",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "ss06": {
+          "description": "[v7.0] Break connected strokes between italic letters ('al', 'il', 'ull' ...)",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "ss07": {
+          "description": "[v7.0] Relax the conditions for multiple greaters ligatures ('>>' or '>>>')",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "ss08": {
+          "description": "[v7.0] Double headed arrows and reverse arrows ligatures ('>>=', '-<<', '->>', '>>-' ...)",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "ss09": {
+          "description": "[v7.1] Asciitilde equal as not equal to ligature ('~=')",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "ss10": {
+          "description": "[v7.1] Approximately equal to and approximately not equal to ligatures ('=~', '!~')",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "ss11": {
+          "description": "[v7.1] Equal and extra punctuation ligatures ('|=', '/=', '?=', '&=', ...)",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "ss12": {
+          "description": "[v8.0] Bulgarian Cyrillic forms",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "ss13": {
+          "description": "[v8.0] Serbian Cyrillic forms",
+          "$ref": "#/definitions/freeze_options"
+        },
+        "zero": {
+          "description": "[v7.0] Zero style variant",
+          "$ref": "#/definitions/freeze_options"
+        }
+      }
+    },
+    "github_mirror": {
+      "type": "string",
+      "description": "Github mirror config, will download from https://{github_mirror}/<user>/<repo>/releases/download/<tag>/<file>",
+      "default": "github.com"
+    },
+    "nerd_font": {
+      "type": "object",
+      "description": "Config for Nerd-Font",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "description": "Whether to enable Nerd-Font",
+          "default": true
+        },
+        "version": {
+          "type": "string",
+          "description": "Target version of Nerd-Font. If font-patcher not exists when need to use it or there is no prebuild font for current version, will download from Github",
+          "default": "3.5.0"
+        },
+        "mono": {
+          "type": "boolean",
+          "description": "Whether to make icons' width fixed",
+          "default": false
+        },
+        "propo": {
+          "type": "boolean",
+          "description": "Whether to make icons' width variable, override \"mono\"",
+          "default": false
+        },
+        "variable": {
+          "type": "boolean",
+          "description": "Whether to build Nerd Font as a variable font",
+          "default": false
+        },
+        "font_forge_bin": {
+          "type": "string",
+          "description": "Font Forge bin path. Default: \n Windows: C:/Program Files (x86)/FontForgeBuilds/bin/fontforge.exe \n MacOS: /Applications/FontForge.app/Contents/Resources/opt/local/bin/fontforge\" \n Linux: /usr/bin/fontforge"
+        },
+        "use_font_patcher": {
+          "type": "boolean",
+          "description": "Prefer to use Font Patcher instead of using prebuilt NerdFont base font. If you want to custom build Nerd-Font using font-patcher, you need to set this to True",
+          "default": false
+        },
+        "glyphs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "--complete"
+          ],
+          "description": "Symbol Fonts settings. if is not [\"--complete\"], will use font-patcher to generate fonts. Full args: https://github.com/ryanoasis/nerd-fonts?tab=readme-ov-file#font-patcher"
+        },
+        "extra_args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Extra arguments for font-patcher, default args: [\"-l\", \"--careful\", \"--outputdir\", output_nf], if \"mono\" is set to true, \"--mono\" will be added, full args: https://github.com/ryanoasis/nerd-fonts?tab=readme-ov-file#font-patcher"
+        }
+      },
+      "required": [
+        "enable",
+        "version",
+        "mono",
+        "variable",
+        "use_font_patcher",
+        "glyphs",
+        "extra_args"
+      ]
+    },
+    "formats": {
+      "$ref": "#/definitions/formats"
+    },
+    "cjk": {
+      "type": "object",
+      "description": "Config for merged Maple Mono + CJK outputs",
+      "properties": {
+        "variable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Persist CJK-extended output as variable fonts"
+        },
+        "locales": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cn": {
+              "type": "boolean",
+              "default": false
+            },
+            "jp": {
+              "type": "boolean",
+              "default": false
+            },
+            "tc": {
+              "type": "boolean",
+              "default": false
+            },
+            "kr": {
+              "type": "boolean",
+              "default": false
+            },
+            "custom": {
+              "type": "array",
+              "default": [],
+              "items": {
+                "allOf": [
+                  {
+                    "$ref": "./cjk/cjk_schema.json"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "enable": {
+                        "type": "boolean",
+                        "default": true
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "required": [
+            "cn",
+            "jp",
+            "tc",
+            "kr",
+            "custom"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "$ref": "#/definitions/cjk_common_config"
+        }
+      ],
+      "required": [
+        "variable",
+        "locales"
+      ]
+    },
+    "cn": {
+      "type": "object",
+      "description": "(Legacy) Config for Chinese font",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "description": "Whether to build Chinese fonts. Skip if Chinese base fonts are not founded",
+          "default": true
+        },
+        "with_nerd_font": {
+          "type": "boolean",
+          "description": "Whether to patch Nerd-Font",
+          "default": true
+        },
+        "fix_meta_table": {
+          "type": "boolean",
+          "description": "Fix design language and supported languages in META table",
+          "default": true
+        },
+        "clean_cache": {
+          "type": "boolean",
+          "description": "Force CJK variable/source fallback regeneration when required; preserves files and does not bypass a valid static directory digest",
+          "default": false
+        },
+        "narrow": {
+          "type": "boolean",
+          "description": "Whether to narrow CN characters. This option will make the font cannot be recogized as monospaced font",
+          "default": false
+        },
+        "use_hinted": {
+          "type": "boolean",
+          "description": "Whether to run AutoHint on final merged Chinese static fonts after instantiation or merge",
+          "default": false
+        },
+        "use_static_base_font": {
+          "type": "boolean",
+          "description": "whether to use large pre-instantiated static CN font as base font (instantiate will cost 40-50 minutes)",
+          "default": true
+        },
+        "scale_factor": {
+          "type": [
+            "number",
+            "array"
+          ],
+          "description": "Scale factor for CN / JP glyphs with <factor> or [<width_factor>,<height_factor>](e.g. 1.1 or [1.2, 1.1])",
+          "default": 1.0
+        }
+      },
+      "required": [
+        "enable",
+        "with_nerd_font",
+        "fix_meta_table",
+        "clean_cache",
+        "narrow",
+        "use_hinted",
+        "use_static_base_font"
+      ]
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "cjk"
+      ]
+    },
+    {
+      "required": [
+        "cn"
+      ]
+    }
+  ],
+  "required": [
+    "family_name",
+    "use_hinted",
+    "nerd_font"
+  ]
+}
