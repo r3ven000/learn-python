@@ -10,3 +10,4 @@ while True:
             print(f"{dask}: {item}")
     else:
         print("ошибка! команда не найдена, попробуй еще раз!")
+
